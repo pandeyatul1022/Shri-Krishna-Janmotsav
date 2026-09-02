@@ -1,0 +1,451 @@
+/* ======================================================
+   श्रीकृष्ण जन्मोत्सव 2026 - Hyper-Realistic Luxury CSS
+   Architecture: Split-Flap Depth, Glass Refraction & Metallic Gold
+   Location: assets/css/style.css
+   ====================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Yatra+One&family=Tiro+Devanagari+Hindi:ital@0;1&family=Outfit:wght@300;400;600;700;800;900&display=swap');
+
+/* --------------------------------------------------
+   1. Design Tokens & Realistic Color System
+   -------------------------------------------------- */
+:root {
+    /* Metallic Gold Palette */
+    --gold-light: #fffbeb;
+    --gold-100: #fef9c3;
+    --gold-300: #fde047;
+    --gold-400: #facc15;
+    --gold-500: #eab308;
+    --gold-600: #ca8a04;
+    --gold-700: #a16207;
+    
+    /* Cosmic Background & Accent Colors */
+    --teal-400: #2dd4bf;
+    --teal-500: #0d9488;
+    --space-blue: #0b1021;
+    --space-dark: #030712;
+
+    /* Glass Refraction & Card Lighting */
+    --card-bg-top: rgba(15, 23, 42, 0.88);
+    --card-bg-bottom: rgba(8, 12, 26, 0.94);
+    --glass-border: linear-gradient(135deg, rgba(254, 240, 138, 0.45), rgba(251, 191, 36, 0.2), rgba(13, 148, 136, 0.3));
+    --card-split-line: rgba(251, 191, 36, 0.25);
+    
+    /* Typography */
+    --font-heading: 'Yatra One', serif;
+    --font-hindi: 'Tiro Devanagari Hindi', serif;
+    --font-numbers: 'Outfit', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+
+    /* Realistic 3D Shadow Layers */
+    --box-shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 
+                       0 0 35px rgba(251, 191, 36, 0.1),
+                       inset 0 1px 1px rgba(255, 255, 255, 0.25),
+                       inset 0 -2px 8px rgba(0, 0, 0, 0.6);
+
+    --box-shadow-hover: 0 35px 70px -15px rgba(0, 0, 0, 0.95), 
+                        0 0 50px rgba(251, 191, 36, 0.35),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+
+    --transition-smooth: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --------------------------------------------------
+   2. Global Reset & Night Mode Canvas Base
+   -------------------------------------------------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+body {
+    background: radial-gradient(ellipse at 50% -10%, #1e1b4b 0%, #090d19 50%, #02040a 100%);
+    color: #f8fafc;
+    font-family: var(--font-body);
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+}
+
+/* --------------------------------------------------
+   3. Realistic Starfield & Moon Atmosphere
+   -------------------------------------------------- */
+#star-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Celestial Nebula Radial Aura */
+.bg-aura {
+    position: fixed;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(900px, 92vw);
+    height: min(900px, 92vw);
+    background: radial-gradient(circle, 
+        rgba(251, 191, 36, 0.12) 0%, 
+        rgba(13, 148, 136, 0.14) 30%, 
+        rgba(49, 46, 129, 0.06) 65%, 
+        transparent 80%
+    );
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Realistic Glowing Crescent Moon */
+.moon-glow {
+    position: fixed;
+    top: 45px;
+    right: 60px;
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    box-shadow: -16px 11px 0 0 #fef08a;
+    filter: drop-shadow(0 0 25px rgba(254, 240, 138, 0.75));
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
+    animation: moonFloat 8s ease-in-out infinite alternate;
+}
+
+@keyframes moonFloat {
+    0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.65)); }
+    100% { transform: translateY(-8px) scale(1.03); filter: drop-shadow(0 0 35px rgba(254, 240, 138, 0.95)); }
+}
+
+/* Background Watermark Peacock Feather Motif */
+.peacock-watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: min(35vw, 400px);
+    color: rgba(13, 148, 136, 0.035);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+}
+
+/* --------------------------------------------------
+   4. Header & Live Indicator Component
+   -------------------------------------------------- */
+.app-header {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 1.5rem 1rem 0.8rem;
+}
+
+/* Live Pulse Indicator Badge */
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    padding: 0.35rem 1rem;
+    border-radius: 30px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--gold-300);
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--teal-400);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--teal-400);
+    animation: pulseDot 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 10px var(--teal-400); }
+    50% { transform: scale(1.4); opacity: 0.5; box-shadow: 0 0 20px var(--teal-400); }
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #ffffff 10%, #fef08a 45%, #eab308 80%, #ca8a04 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.4));
+    line-height: 1.2;
+}
+
+.date-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 148, 136, 0.2);
+    border: 1px solid rgba(45, 212, 191, 0.4);
+    color: #5eead4;
+    padding: 0.55rem 1.4rem;
+    border-radius: 50px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.2);
+    font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+    transition: var(--transition-smooth);
+}
+
+.date-badge:hover {
+    border-color: rgba(45, 212, 191, 0.85);
+    box-shadow: 0 6px 25px rgba(45, 212, 191, 0.35);
+    transform: translateY(-2px);
+}
+
+.font-hindi {
+    font-family: var(--font-hindi);
+}
+
+/* --------------------------------------------------
+   5. Realistic Split-Flap Glass Countdown Cards
+   -------------------------------------------------- */
+.countdown-section {
+    position: relative;
+    z-index: 2;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 0.5rem;
+}
+
+.countdown-card-wrapper {
+    perspective: 1200px;
+}
+
+/* Realistic Depth Card Container */
+.countdown-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, var(--card-bg-top) 0%, var(--card-bg-bottom) 100%);
+    border: 1.5px solid rgba(251, 191, 36, 0.35);
+    border-radius: 24px;
+    padding: clamp(1.8rem, 3.8vw, 2.8rem) 0.8rem;
+    text-align: center;
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    box-shadow: var(--box-shadow-card);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+}
+
+/* Realistic Split-Flap Middle Divider Line */
+.countdown-box::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(251, 191, 36, 0.15), 
+        var(--card-split-line), 
+        rgba(251, 191, 36, 0.15), 
+        transparent
+    );
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    z-index: 2;
+}
+
+/* Metallic Top Rim Highlight */
+.top-rim {
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.85), 
+        var(--gold-400), 
+        rgba(255, 255, 255, 0.85), 
+        transparent
+    );
+    z-index: 3;
+}
+
+/* Shimmer Sweep Animation */
+.countdown-box::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.75s ease;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.countdown-box:hover::after {
+    left: 140%;
+}
+
+.countdown-box:hover {
+    transform: translateY(-8px) scale(1.025);
+    border-color: rgba(251, 191, 36, 0.75);
+    box-shadow: var(--box-shadow-hover);
+}
+
+/* Realistic Metallic Numbers */
+.number-display {
+    font-family: var(--font-numbers);
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 1;
+    font-weight: 800;
+    background: linear-gradient(180deg, #ffffff 15%, #fde047 50%, #eab308 80%, #a16207 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 15px rgba(234, 179, 8, 0.5));
+    margin-bottom: 0.4rem;
+    display: block;
+    letter-spacing: -1px;
+    position: relative;
+    z-index: 3;
+}
+
+/* Fluid Labels */
+.label-display {
+    color: #94a3b8;
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: clamp(2px, 0.5vw, 4px);
+    text-transform: uppercase;
+    display: block;
+    transition: color 0.3s ease;
+    position: relative;
+    z-index: 3;
+}
+
+.countdown-box:hover .label-display {
+    color: var(--gold-300);
+}
+
+/* --------------------------------------------------
+   6. Footer Component
+   -------------------------------------------------- */
+.app-footer {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid rgba(251, 191, 36, 0.15);
+    background: rgba(2, 6, 23, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.footer-text {
+    color: var(--gold-400);
+    font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 14px rgba(251, 191, 36, 0.35);
+}
+
+/* --------------------------------------------------
+   7. Responsive Media Queries
+   -------------------------------------------------- */
+@media (min-width: 992px) {
+    .countdown-section {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .app-header {
+        padding-top: 1.8rem;
+    }
+    .countdown-box {
+        padding: 2.2rem 0.8rem;
+    }
+    .moon-glow {
+        top: 30px;
+        right: 35px;
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .moon-glow {
+        top: 20px;
+        right: 25px;
+        width: 55px;
+        height: 55px;
+        box-shadow: -10px 7px 0 0 #fef08a;
+    }
+    .countdown-box {
+        padding: 1.8rem 0.6rem;
+        border-radius: 20px;
+    }
+}
+
+@media (max-width: 575px) {
+    .moon-glow {
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        box-shadow: -9px 6px 0 0 #fef08a;
+    }
+
+    .app-header {
+        padding: 1rem 0.5rem 0.5rem;
+    }
+
+    .date-badge {
+        padding: 0.45rem 1rem;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .countdown-box {
+        padding: 1.5rem 0.4rem;
+        border-radius: 18px;
+    }
+
+    .countdown-box:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 359px) {
+    .number-display {
+        font-size: 2.4rem;
+    }
+    .label-display {
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+    }
+    .countdown-box {
+        padding: 1.2rem 0.2rem;
+    }
+}
