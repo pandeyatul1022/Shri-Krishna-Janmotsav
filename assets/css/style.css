@@ -199,18 +199,22 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    border: none;
+    background: rgba(13, 148, 136, 0.2);
+    border: 1px solid rgba(45, 212, 191, 0.4);
     color: #5eead4;
-    padding: 0.5rem 1rem;
+    padding: 0.55rem 1.4rem;
+    border-radius: 50px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.2);
     font-size: clamp(0.9rem, 2.5vw, 1.15rem);
     transition: var(--transition-smooth);
-    text-shadow: 0 0 12px rgba(45, 212, 191, 0.4);
 }
 
 .date-badge:hover {
+    border-color: rgba(45, 212, 191, 0.85);
+    box-shadow: 0 6px 25px rgba(45, 212, 191, 0.35);
     transform: translateY(-2px);
-    text-shadow: 0 0 20px rgba(45, 212, 191, 0.8);
 }
 
 .font-hindi {
