@@ -410,30 +410,61 @@ body {
 
 @media (max-width: 575px) {
     .moon-glow {
-        top: 15px;
-        right: 15px;
-        width: 45px;
-        height: 45px;
-        box-shadow: -9px 6px 0 0 #fef08a;
+        top: 12px;
+        right: 12px;
+        width: 42px;
+        height: 42px;
+        box-shadow: -8px 5px 0 0 #fef08a;
     }
 
     .app-header {
-        padding: 1rem 0.5rem 0.5rem;
+        padding: 0.4rem 0.4rem 0.2rem;
+    }
+
+    .live-indicator {
+        margin-bottom: 0.4rem;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.72rem;
+    }
+
+    .hero-title {
+        font-size: clamp(1.8rem, 6.8vw, 2.4rem);
+        margin-bottom: 0.35rem !important;
     }
 
     .date-badge {
-        padding: 0.45rem 1rem;
-        width: 100%;
-        max-width: 320px;
+        padding: 0.4rem 0.85rem;
+        width: auto;
+        max-width: 310px;
+        font-size: 0.88rem;
     }
 
     .countdown-box {
-        padding: 1.5rem 0.4rem;
-        border-radius: 18px;
+        padding: 1.0rem 0.3rem;
+        border-radius: 16px;
+    }
+
+    .number-display {
+        font-size: clamp(2.4rem, 8vw, 3.2rem);
+        margin-bottom: 0.15rem;
+    }
+
+    .label-display {
+        font-size: 0.72rem;
+        letter-spacing: 2px;
     }
 
     .countdown-box:hover {
         transform: none;
+    }
+
+    .app-footer {
+        padding-top: 0.4rem !important;
+        padding-bottom: 0.4rem !important;
+    }
+
+    .footer-text {
+        font-size: 0.88rem;
     }
 }
 
