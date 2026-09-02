@@ -136,6 +136,7 @@ class CountdownApp {
     constructor() {
         // Target Date: 4 September 2026 00:00:00 IST
         this.targetDate = new Date('September 4, 2026 00:00:00').getTime();
+        // this.targetDate = Date.now() + 5000;
 
         // DOM Elements
         this.daysEl = document.getElementById('days');
@@ -143,6 +144,18 @@ class CountdownApp {
         this.minutesEl = document.getElementById('minutes');
         this.secondsEl = document.getElementById('seconds');
         this.celebrationEl = document.getElementById('celebration-message');
+
+        // Jail Gate & Flower Shower DOM
+        this.jailOverlay = document.getElementById('jail-gate-overlay');
+        this.leftGate = document.getElementById('left-gate');
+        this.rightGate = document.getElementById('right-gate');
+        this.jailLock = document.getElementById('jail-lock');
+        this.flowerContainer = document.getElementById('flower-shower-container');
+
+        // Flower Emojis Array (Filtered: 🌸 🌺 🌻 🪷 🌼 🏵️)
+        this.flowerEmojis = ['🌸', '🌺', '🌻', '🪷', '🌼', '🏵️'];
+        this.hasCelebrated = false;
+        this.flowerInterval = null;
 
         // Canvas Setup
         this.canvas = document.getElementById('star-canvas');
@@ -174,6 +187,9 @@ class CountdownApp {
 
         if (difference <= 0) {
             this.renderValues(0, 0, 0, 0);
+            if (!this.hasCelebrated) {
+                this.triggerJailGateOpening();
+            }
             if (this.celebrationEl) this.celebrationEl.classList.remove('d-none');
             return;
         }
@@ -193,6 +209,94 @@ class CountdownApp {
         if (this.hoursEl) this.hoursEl.textContent = String(hours).padStart(2, '0');
         if (this.minutesEl) this.minutesEl.textContent = String(minutes).padStart(2, '0');
         if (this.secondsEl) this.secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+
+    triggerJailGateOpening() {
+        this.hasCelebrated = true;
+        if (!this.jailOverlay) return;
+
+        // Reset Overlay & Gates State
+        this.jailOverlay.classList.remove('d-none');
+        this.jailOverlay.style.opacity = '1';
+        if (this.jailLock) this.jailLock.classList.remove('broken');
+        if (this.leftGate) this.leftGate.classList.remove('open');
+        if (this.rightGate) this.rightGate.classList.remove('open');
+        this.jailOverlay.classList.remove('active');
+
+        // Step 1: Break Lock & Trigger Divine Beam Light (500ms)
+        setTimeout(() => {
+            if (this.jailLock) this.jailLock.classList.add('broken');
+            this.jailOverlay.classList.add('active');
+        }, 400);
+
+        // Step 2: Swing 3D Jail Gate Doors Open Outward (1000ms)
+        setTimeout(() => {
+            if (this.leftGate) this.leftGate.classList.add('open');
+            if (this.rightGate) this.rightGate.classList.add('open');
+        }, 1000);
+
+        // Step 3: Start Cascade Flower Shower Rain & Display Banner (1800ms)
+        setTimeout(() => {
+            this.startFlowerShower();
+            if (this.celebrationEl) this.celebrationEl.classList.remove('d-none');
+        }, 1600);
+
+        // Step 4: Fade Out Overlay Overlay after gates fully open so full interface & flower rain shine through (4800ms)
+        setTimeout(() => {
+            this.jailOverlay.style.opacity = '0';
+            setTimeout(() => {
+                this.jailOverlay.classList.add('d-none');
+            }, 800);
+        }, 4800);
+    }
+
+    startFlowerShower() {
+        if (!this.flowerContainer) return;
+
+        // Clear existing flowers
+        this.flowerContainer.innerHTML = '';
+
+        // Initial burst of 35 flowers
+        for (let i = 0; i < 35; i++) {
+            setTimeout(() => this.spawnSingleFlower(), i * 80);
+        }
+
+        // Continuous shower every 250ms
+        if (this.flowerInterval) clearInterval(this.flowerInterval);
+        this.flowerInterval = setInterval(() => {
+            this.spawnSingleFlower();
+        }, 250);
+    }
+
+    spawnSingleFlower() {
+        if (!this.flowerContainer) return;
+
+        const flowerEl = document.createElement('div');
+        flowerEl.className = 'flower-particle';
+
+        // Pick random flower emoji from active list: 🌸 🌺 🌻 🪷 🌼 🏵️
+        const emoji = this.flowerEmojis[Math.floor(Math.random() * this.flowerEmojis.length)];
+        flowerEl.textContent = emoji;
+
+        // Random positions and speeds
+        const startX = Math.random() * 96; // 0% to 96%
+        const fallDuration = (Math.random() * 3.5 + 3.8).toFixed(2); // 3.8s to 7.3s
+        const swayDuration = (Math.random() * 2.2 + 2.0).toFixed(2); // 2s to 4.2s
+        const scale = (Math.random() * 0.7 + 0.7).toFixed(2); // 0.7 to 1.4
+
+        flowerEl.style.left = `${startX}vw`;
+        flowerEl.style.setProperty('--fall-duration', `${fallDuration}s`);
+        flowerEl.style.setProperty('--sway-duration', `${swayDuration}s`);
+        flowerEl.style.setProperty('--flower-scale', scale);
+
+        this.flowerContainer.appendChild(flowerEl);
+
+        // Remove element after animation completes to keep memory lean
+        setTimeout(() => {
+            if (flowerEl && flowerEl.parentNode) {
+                flowerEl.parentNode.removeChild(flowerEl);
+            }
+        }, parseFloat(fallDuration) * 1000 + 1000);
     }
 
     setupCanvas() {
@@ -280,5 +384,5 @@ class CountdownApp {
 
 // Initialize Application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new CountdownApp();
+    window.app = new CountdownApp();
 });

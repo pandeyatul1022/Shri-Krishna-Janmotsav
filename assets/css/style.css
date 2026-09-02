@@ -18,7 +18,7 @@
     --gold-500: #eab308;
     --gold-600: #ca8a04;
     --gold-700: #a16207;
-    
+
     /* Cosmic Background & Accent Colors */
     --teal-400: #2dd4bf;
     --teal-500: #0d9488;
@@ -30,7 +30,7 @@
     --card-bg-bottom: rgba(8, 12, 26, 0.94);
     --glass-border: linear-gradient(135deg, rgba(254, 240, 138, 0.45), rgba(251, 191, 36, 0.2), rgba(13, 148, 136, 0.3));
     --card-split-line: rgba(251, 191, 36, 0.25);
-    
+
     /* Typography */
     --font-heading: 'Yatra One', serif;
     --font-hindi: 'Tiro Devanagari Hindi', serif;
@@ -38,14 +38,14 @@
     --font-body: 'Outfit', sans-serif;
 
     /* Realistic 3D Shadow Layers */
-    --box-shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 
-                       0 0 35px rgba(251, 191, 36, 0.1),
-                       inset 0 1px 1px rgba(255, 255, 255, 0.25),
-                       inset 0 -2px 8px rgba(0, 0, 0, 0.6);
+    --box-shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.85),
+        0 0 35px rgba(251, 191, 36, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.25),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.6);
 
-    --box-shadow-hover: 0 35px 70px -15px rgba(0, 0, 0, 0.95), 
-                        0 0 50px rgba(251, 191, 36, 0.35),
-                        inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    --box-shadow-hover: 0 35px 70px -15px rgba(0, 0, 0, 0.95),
+        0 0 50px rgba(251, 191, 36, 0.35),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4);
 
     --transition-smooth: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -53,13 +53,16 @@
 /* --------------------------------------------------
    2. Global Reset & Night Mode Canvas Base
    -------------------------------------------------- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     min-height: 100vh;
     overflow-x: hidden;
@@ -96,12 +99,11 @@ body {
     transform: translate(-50%, -50%);
     width: min(900px, 92vw);
     height: min(900px, 92vw);
-    background: radial-gradient(circle, 
-        rgba(251, 191, 36, 0.12) 0%, 
-        rgba(13, 148, 136, 0.14) 30%, 
-        rgba(49, 46, 129, 0.06) 65%, 
-        transparent 80%
-    );
+    background: radial-gradient(circle,
+            rgba(251, 191, 36, 0.12) 0%,
+            rgba(13, 148, 136, 0.14) 30%,
+            rgba(49, 46, 129, 0.06) 65%,
+            transparent 80%);
     filter: blur(90px);
     pointer-events: none;
     z-index: 0;
@@ -124,8 +126,15 @@ body {
 }
 
 @keyframes moonFloat {
-    0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.65)); }
-    100% { transform: translateY(-8px) scale(1.03); filter: drop-shadow(0 0 35px rgba(254, 240, 138, 0.95)); }
+    0% {
+        transform: translateY(0) scale(1);
+        filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.65));
+    }
+
+    100% {
+        transform: translateY(-8px) scale(1.03);
+        filter: drop-shadow(0 0 35px rgba(254, 240, 138, 0.95));
+    }
 }
 
 /* Background Watermark Peacock Feather Motif */
@@ -180,8 +189,19 @@ body {
 }
 
 @keyframes pulseDot {
-    0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 10px var(--teal-400); }
-    50% { transform: scale(1.4); opacity: 0.5; box-shadow: 0 0 20px var(--teal-400); }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 10px var(--teal-400);
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.5;
+        box-shadow: 0 0 20px var(--teal-400);
+    }
 }
 
 .hero-title {
@@ -264,13 +284,12 @@ body {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(251, 191, 36, 0.15), 
-        var(--card-split-line), 
-        rgba(251, 191, 36, 0.15), 
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(251, 191, 36, 0.15),
+            var(--card-split-line),
+            rgba(251, 191, 36, 0.15),
+            transparent);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     z-index: 2;
 }
@@ -282,13 +301,12 @@ body {
     left: 12%;
     right: 12%;
     height: 2px;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.85), 
-        var(--gold-400), 
-        rgba(255, 255, 255, 0.85), 
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.85),
+            var(--gold-400),
+            rgba(255, 255, 255, 0.85),
+            transparent);
     z-index: 3;
 }
 
@@ -383,9 +401,11 @@ body {
     .app-header {
         padding-top: 1.8rem;
     }
+
     .countdown-box {
         padding: 2.2rem 0.8rem;
     }
+
     .moon-glow {
         top: 30px;
         right: 35px;
@@ -402,6 +422,7 @@ body {
         height: 55px;
         box-shadow: -10px 7px 0 0 #fef08a;
     }
+
     .countdown-box {
         padding: 1.8rem 0.6rem;
         border-radius: 20px;
@@ -472,11 +493,332 @@ body {
     .number-display {
         font-size: 2.4rem;
     }
+
     .label-display {
         font-size: 0.7rem;
         letter-spacing: 1px;
     }
+
     .countdown-box {
         padding: 1.2rem 0.2rem;
+    }
+}
+
+/* --------------------------------------------------
+   8. Hyper-Realistic 3D Mathura Fortress Jail Gate Engine
+   -------------------------------------------------- */
+.jail-gate-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #030712 90%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1600px;
+    overflow: hidden;
+    transition: opacity 0.8s ease;
+}
+
+/* Ancient Fortress Stone Wall Texture Backdrop */
+.fortress-stone-wall {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(335deg, rgba(0,0,0,0.85) 0%, transparent 50%),
+        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.6) 40px, rgba(0,0,0,0.6) 43px),
+        repeating-linear-gradient(90deg, transparent, transparent 90px, rgba(0,0,0,0.6) 90px, rgba(0,0,0,0.6) 93px);
+    background-color: #0b1021;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+/* Flickering Ancient Dungeon Torches */
+.dungeon-torch {
+    position: absolute;
+    top: 32%;
+    width: 26px;
+    height: 65px;
+    background: linear-gradient(180deg, #ca8a04 0%, #451a03 100%);
+    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+    z-index: 4;
+}
+
+.left-torch { left: min(6vw, 40px); }
+.right-torch { right: min(6vw, 40px); }
+
+.torch-flame {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 28px;
+    background: radial-gradient(ellipse at 50% 80%, #ffffff 0%, #facc15 30%, #ef4444 70%, transparent 100%);
+    border-radius: 50% 50% 35% 35%;
+    filter: drop-shadow(0 0 12px #facc15);
+    animation: torchFlicker 0.15s infinite alternate ease-in-out;
+}
+
+@keyframes torchFlicker {
+    0% { transform: translateX(-50%) scale(1) rotate(-2deg); opacity: 0.95; }
+    100% { transform: translateX(-50%) scale(1.15) rotate(3deg); opacity: 1; filter: drop-shadow(0 0 18px #f97316); }
+}
+
+/* Divine Celestial Light Burst from Inside Prison */
+.divine-light-burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.15);
+    width: 130vw;
+    height: 130vh;
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(254, 240, 138, 0.95) 20%, 
+        rgba(251, 191, 36, 0.8) 40%, 
+        rgba(234, 179, 8, 0.4) 65%, 
+        transparent 85%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 2.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s ease-in;
+    z-index: 1;
+}
+
+.jail-gate-overlay.active .divine-light-burst {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.7);
+}
+
+/* 3D Gate Frame Container & Archway */
+.jail-gate-frame {
+    position: relative;
+    width: min(92vw, 760px);
+    height: min(84vh, 630px);
+    border: 14px solid #78350f;
+    border-bottom: none;
+    border-radius: 320px 320px 0 0;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(234, 179, 8, 0.3), inset 0 0 40px rgba(0, 0, 0, 0.9);
+    background: #020617;
+    display: flex;
+    z-index: 3;
+    transform-style: preserve-3d;
+}
+
+/* Royal Palace Fortress Arch Header */
+.jail-archway {
+    position: absolute;
+    top: -52px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #854d0e 100%);
+    color: #090d19;
+    padding: 0.65rem 2.4rem;
+    border-radius: 40px;
+    font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+    font-weight: 800;
+    box-shadow: 0 10px 35px rgba(251, 191, 36, 0.5), inset 0 1px 2px #ffffff;
+    border: 2px solid #fef08a;
+    white-space: nowrap;
+    z-index: 6;
+}
+
+/* Heavy Metallic 3D Doors (Left & Right) */
+.jail-gate-door {
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 60%, #020617 100%);
+    border: 6px solid #451a03;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 2.9s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95);
+}
+
+.left-gate {
+    transform-origin: left center;
+    border-right: 3px solid #ca8a04;
+}
+
+.right-gate {
+    transform-origin: right center;
+    border-left: 3px solid #ca8a04;
+}
+
+.door-panel {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+/* Vertical Wrought Iron Bars Texture */
+.gate-bars {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 34px,
+        #334155 34px,
+        #334155 40px,
+        #0f172a 40px,
+        #0f172a 46px
+    );
+}
+
+/* Horizontal Heavy Iron Diagonal Beams */
+.gate-crossbars {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 110px,
+        #475569 110px,
+        #475569 122px,
+        #1e293b 122px,
+        #1e293b 128px
+    );
+    opacity: 0.85;
+}
+
+/* Golden Rivets / Studs */
+.gate-studs {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 110px,
+        rgba(250, 204, 21, 0.7) 110px,
+        rgba(250, 204, 21, 0.7) 118px
+    );
+}
+
+/* Heavy Iron Ring Door Handles */
+.gate-ring-handle {
+    position: absolute;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    border: 5px solid #eab308;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.6);
+}
+
+.left-gate .gate-ring-handle { right: 20px; }
+.right-gate .gate-ring-handle { left: 20px; }
+
+/* Open Doors Animation Classes */
+.left-gate.open {
+    transform: rotateY(-118deg);
+}
+
+.right-gate.open {
+    transform: rotateY(118deg);
+}
+
+/* Heavy Chains & Ancient Brass Pad Lock */
+.jail-lock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.6s ease-in, opacity 0.6s ease-out;
+}
+
+.lock-chains {
+    width: 220px;
+    height: 18px;
+    background: repeating-linear-gradient(
+        90deg,
+        #94a3b8,
+        #94a3b8 16px,
+        #334155 16px,
+        #334155 24px
+    );
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.9);
+    margin-bottom: -10px;
+}
+
+.lock-body {
+    width: 76px;
+    height: 76px;
+    background: radial-gradient(circle, #fef08a 0%, #eab308 50%, #78350f 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    color: #020617;
+    box-shadow: 0 0 35px rgba(254, 240, 138, 0.95), inset 0 2px 4px #ffffff;
+    border: 2px solid #fef08a;
+}
+
+.jail-lock.broken {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+}
+
+/* --------------------------------------------------
+   9. Flower Rain Particle Cascade
+   -------------------------------------------------- */
+.flower-shower-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.flower-particle {
+    position: absolute;
+    top: -60px;
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    user-select: none;
+    pointer-events: none;
+    animation: flowerFall var(--fall-duration, 5s) linear infinite, flowerSway var(--sway-duration, 3s) ease-in-out infinite alternate;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+    will-change: transform;
+}
+
+@keyframes flowerFall {
+    0% {
+        top: -60px;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: 105vh;
+        opacity: 0;
+    }
+}
+
+@keyframes flowerSway {
+    0% {
+        transform: translateX(-35px) rotate(0deg) scale(var(--flower-scale, 1));
+    }
+    100% {
+        transform: translateX(35px) rotate(360deg) scale(var(--flower-scale, 1));
     }
 }
