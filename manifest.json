@@ -1,0 +1,17 @@
+{
+  "name": "श्रीकृष्ण जन्मोत्सव 2026",
+  "short_name": "जन्माष्टमी 2026",
+  "description": "श्रीकृष्ण जन्मोत्सव 2026 - कृष्ण जन्माष्टमी लाइव उलटी गिनती एवं मथुरा कारागार 3D उत्सव",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#090d19",
+  "icons": [
+    {
+      "src": "assets/images/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

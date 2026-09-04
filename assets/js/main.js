@@ -134,9 +134,48 @@ class ShootingStar {
  */
 class CountdownApp {
     constructor() {
-        // Target Date: 4 September 2026 00:00:00 IST
-        this.targetDate = new Date('September 4, 2026 00:00:00').getTime();
-        // this.targetDate = Date.now() + 5000;
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // 1. Primary Target Date: Shri Krishna Janmotsav (4 September 2026 11:59:00 PM IST)
+        const primaryTargetISO = '2026-09-04T23:59:00+05:30';
+        const primaryTargetMs = new Date(primaryTargetISO).getTime();
+
+        // 24-Hour Celebration Window after 11:59 PM (until 5 September 2026 11:59:00 PM IST)
+        const celebrationWindowMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        // 2. Next Year Target Date: Shri Krishna Janmashtami 2027 (25 August 2027 00:00:00 IST)
+        const nextYearTargetISO = '2027-08-25T00:00:00+05:30';
+        const nextYearTargetMs = new Date(nextYearTargetISO).getTime();
+
+        const now = Date.now();
+
+        // Target Date Initialization (Live Production Mode vs Demo Parameters)
+        if (urlParams.get('force') === 'celebration') {
+            this.targetDate = now - 1000;
+            this.celebrationEndTime = now + celebrationWindowMs;
+        } else if (urlParams.get('force') === 'countdown') {
+            this.targetDate = nextYearTargetMs;
+            this.celebrationEndTime = 0;
+        } else if (urlParams.get('demo') === 'true' || urlParams.get('test') === 'true') {
+            const demoSeconds = parseInt(urlParams.get('seconds'), 10) || 5;
+            this.targetDate = now + demoSeconds * 1000;
+            this.celebrationEndTime = this.targetDate + celebrationWindowMs;
+        } else {
+            // Live Production Time Cycle:
+            if (now < primaryTargetMs) {
+                // Count down to Shri Krishna Janmotsav (4 September 2026 11:59:00 PM IST)
+                this.targetDate = primaryTargetMs;
+                this.celebrationEndTime = primaryTargetMs + celebrationWindowMs;
+            } else if (now >= primaryTargetMs && now < (primaryTargetMs + celebrationWindowMs)) {
+                // Active 24-hour celebration window post-birth
+                this.targetDate = primaryTargetMs;
+                this.celebrationEndTime = primaryTargetMs + celebrationWindowMs;
+            } else {
+                // After 24 hours pass -> Target next year's Janmashtami (2027)
+                this.targetDate = nextYearTargetMs;
+                this.celebrationEndTime = 0;
+            }
+        }
 
         // DOM Elements
         this.daysEl = document.getElementById('days');
@@ -145,12 +184,17 @@ class CountdownApp {
         this.secondsEl = document.getElementById('seconds');
         this.celebrationEl = document.getElementById('celebration-message');
 
-        // Jail Gate & Flower Shower DOM
+        // Jail Gate & Video Darshan DOM
         this.jailOverlay = document.getElementById('jail-gate-overlay');
         this.leftGate = document.getElementById('left-gate');
         this.rightGate = document.getElementById('right-gate');
         this.jailLock = document.getElementById('jail-lock');
         this.flowerContainer = document.getElementById('flower-shower-container');
+        this.videoEl = document.getElementById('krishna-divine-video');
+        this.videoSource = document.getElementById('video-source');
+        this.muteBtn = document.getElementById('video-mute-btn');
+        this.muteIcon = document.getElementById('mute-icon');
+        this.soundLabel = document.getElementById('sound-label');
 
         // Flower Emojis Array (Filtered: 🌸 🌺 🌻 🪷 🌼 🏵️)
         this.flowerEmojis = ['🌸', '🌺', '🌻', '🪷', '🌼', '🏵️'];
@@ -168,13 +212,167 @@ class CountdownApp {
         this.init();
     }
 
+    stopFlowerShower() {
+        if (this.flowerInterval) {
+            clearInterval(this.flowerInterval);
+            this.flowerInterval = null;
+        }
+        if (this.flowerContainer) {
+            this.flowerContainer.innerHTML = '';
+        }
+    }
+
+    startFlowerShower() {
+        if (!this.flowerContainer) return;
+
+        this.flowerContainer.innerHTML = '';
+
+        for (let i = 0; i < 35; i++) {
+            setTimeout(() => this.spawnSingleFlower(), i * 80);
+        }
+
+        if (this.flowerInterval) clearInterval(this.flowerInterval);
+        this.flowerInterval = setInterval(() => {
+            this.spawnSingleFlower();
+        }, 250);
+    }
+
+    spawnSingleFlower() {
+        if (!this.flowerContainer) return;
+
+        const flowerEl = document.createElement('div');
+        flowerEl.className = 'flower-particle';
+
+        const emoji = this.flowerEmojis[Math.floor(Math.random() * this.flowerEmojis.length)];
+        flowerEl.textContent = emoji;
+
+        const startX = Math.random() * 96;
+        const fallDuration = (Math.random() * 3.5 + 3.8).toFixed(2);
+        const swayDuration = (Math.random() * 2.2 + 2.0).toFixed(2);
+        const scale = (Math.random() * 0.7 + 0.7).toFixed(2);
+
+        flowerEl.style.left = `${startX}vw`;
+        flowerEl.style.setProperty('--fall-duration', `${fallDuration}s`);
+        flowerEl.style.setProperty('--sway-duration', `${swayDuration}s`);
+        flowerEl.style.setProperty('--flower-scale', scale);
+
+        this.flowerContainer.appendChild(flowerEl);
+
+        setTimeout(() => {
+            if (flowerEl && flowerEl.parentNode) {
+                flowerEl.parentNode.removeChild(flowerEl);
+            }
+        }, parseFloat(fallDuration) * 1000 + 100);
+    }
+
     init() {
         this.updateCountdown();
         setInterval(() => this.updateCountdown(), 1000);
 
+        // 24-Hour Celebration: Video loops continuously.
+        // After 24 hours, stop looping and show the festive greeting.
+        const greetingOverlay = document.getElementById('video-end-greeting');
+        const replayBtn = document.getElementById('replay-darshan-btn');
+
+        const CELEBRATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+        if (this.videoEl) {
+            // After 24 hours, stop the loop and show greeting
+            setTimeout(() => {
+                if (this.videoEl) {
+                    this.videoEl.loop = false;
+                    this.videoEl.addEventListener('ended', () => {
+                        if (greetingOverlay) greetingOverlay.classList.remove('d-none');
+                        this.stopFlowerShower();
+                    }, { once: true });
+                }
+            }, CELEBRATION_DURATION_MS);
+        }
+
+        if (replayBtn && this.videoEl) {
+            replayBtn.addEventListener('click', () => {
+                if (greetingOverlay) greetingOverlay.classList.add('d-none');
+                this.videoEl.loop = true;
+                this.videoEl.currentTime = 0;
+                this.unmuteAndPlayVideo();
+                this.startFlowerShower();
+            });
+        }
+
+        // Persistent User Interaction Listener: Unmutes & starts song on any user click/tap
+        const unlockAudioOnUserGesture = () => {
+            if (this.videoEl && (this.videoEl.muted || this.videoEl.paused)) {
+                this.unmuteAndPlayVideo();
+            }
+        };
+
+        ['click', 'touchstart', 'pointerdown', 'keydown'].forEach((eventType) => {
+            document.addEventListener(eventType, unlockAudioOnUserGesture, { passive: true });
+        });
+
+        // Also bind directly to video container & jail overlay
+        const videoWrapper = document.querySelector('.krishna-video-wrapper');
+        if (videoWrapper) {
+            videoWrapper.addEventListener('click', () => this.unmuteAndPlayVideo());
+        }
+        if (this.jailOverlay) {
+            this.jailOverlay.addEventListener('click', () => this.unmuteAndPlayVideo());
+        }
+
+        // Video Audio Mute/Unmute Toggle
+        if (this.muteBtn && this.videoEl) {
+            this.muteBtn.addEventListener('click', () => {
+                if (this.videoEl.muted) {
+                    this.unmuteAndPlayVideo();
+                } else {
+                    this.videoEl.muted = true;
+                    if (this.muteIcon) this.muteIcon.className = 'fas fa-volume-mute';
+                    if (this.soundLabel) this.soundLabel.textContent = 'ध्वनि चालू करें';
+                }
+            });
+        }
+
+        // Video Tab Switcher
+        const tabBtns = document.querySelectorAll('.video-tab-btn');
+        tabBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                const targetVideo = btn.getAttribute('data-video');
+                if (targetVideo && this.videoEl && this.videoSource) {
+                    if (greetingOverlay) greetingOverlay.classList.add('d-none');
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    this.videoSource.src = targetVideo;
+                    this.videoEl.load();
+                    this.unmuteAndPlayVideo();
+                }
+            });
+        });
+
+        // Bind Pushpanjali and Close Darshan buttons
+        const pushpanjaliBtn = document.getElementById('pushpanjali-btn');
+        if (pushpanjaliBtn) {
+            pushpanjaliBtn.addEventListener('click', () => {
+                this.startFlowerShower();
+                this.playSynthSound('templeChime');
+            });
+        }
+
+        const closeDarshanBtn = document.getElementById('close-darshan-btn');
+        if (closeDarshanBtn && this.jailOverlay) {
+            closeDarshanBtn.addEventListener('click', () => {
+                this.jailOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    this.jailOverlay.classList.add('d-none');
+                    if (this.videoEl) this.videoEl.pause();
+                    if (greetingOverlay) greetingOverlay.classList.add('d-none');
+                    this.stopFlowerShower();
+                }, 800);
+            });
+        }
+
         if (this.canvas && this.ctx) {
             this.setupCanvas();
-            // Enable 3D Tilt only for non-touch desktop devices
             if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
                 this.setup3DTilt();
             }
@@ -185,7 +383,10 @@ class CountdownApp {
         const now = Date.now();
         const difference = this.targetDate - now;
 
-        if (difference <= 0) {
+        // Check if we are currently within the 24-hour celebration window post 4th Sept 11:59 PM
+        const isCelebrationWindow = (now >= this.targetDate) && (this.celebrationEndTime === 0 || now < this.celebrationEndTime);
+
+        if (isCelebrationWindow) {
             this.renderValues(0, 0, 0, 0);
             if (!this.hasCelebrated) {
                 this.triggerJailGateOpening();
@@ -194,12 +395,24 @@ class CountdownApp {
             return;
         }
 
+        // If 24 hours have passed post birth, transition target to next year (2027)
+        if (now >= this.celebrationEndTime && this.celebrationEndTime > 0) {
+            const nextYearMs = new Date('2027-08-25T00:00:00+05:30').getTime();
+            this.targetDate = nextYearMs;
+            this.celebrationEndTime = 0;
+            this.hasCelebrated = false;
+            if (this.jailOverlay) {
+                this.jailOverlay.classList.add('d-none');
+            }
+        }
+
         if (this.celebrationEl) this.celebrationEl.classList.add('d-none');
 
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        const remainingDiff = Math.max(0, this.targetDate - now);
+        const days = Math.floor(remainingDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((remainingDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingDiff % (1000 * 60)) / 1000);
 
         this.renderValues(days, hours, minutes, seconds);
     }
@@ -215,88 +428,133 @@ class CountdownApp {
         this.hasCelebrated = true;
         if (!this.jailOverlay) return;
 
-        // Reset Overlay & Gates State
+        const jailFrame = document.getElementById('jail-frame');
+
+        // Reset Overlay, Frame Rumble & Gates State
         this.jailOverlay.classList.remove('d-none');
         this.jailOverlay.style.opacity = '1';
+        if (jailFrame) jailFrame.classList.remove('rumble');
         if (this.jailLock) this.jailLock.classList.remove('broken');
         if (this.leftGate) this.leftGate.classList.remove('open');
         if (this.rightGate) this.rightGate.classList.remove('open');
         this.jailOverlay.classList.remove('active');
 
-        // Step 1: Break Lock & Trigger Divine Beam Light (500ms)
+        // Step 1: Pre-opening Fortress Camera Rumble (0ms)
+        if (jailFrame) jailFrame.classList.add('rumble');
+
+        // Step 2: Metallic Lock Shatter & Divine Light Eruption (450ms)
         setTimeout(() => {
+            if (jailFrame) jailFrame.classList.remove('rumble');
             if (this.jailLock) this.jailLock.classList.add('broken');
             this.jailOverlay.classList.add('active');
-        }, 400);
 
-        // Step 2: Swing 3D Jail Gate Doors Open Outward (1000ms)
+            this.playSynthSound('shatter');
+        }, 450);
+
+        // Step 3: Heavy 3D Wooden/Iron Gate Doors Swing Open Outward (1200ms)
         setTimeout(() => {
             if (this.leftGate) this.leftGate.classList.add('open');
             if (this.rightGate) this.rightGate.classList.add('open');
-        }, 1000);
 
-        // Step 3: Start Cascade Flower Shower Rain & Display Banner (1800ms)
+            this.playSynthSound('gateOpen');
+        }, 1200);
+
+        // Step 4: Auto Pushpanjali & Poster Display (1800ms) - Show poster for 3 seconds first
         setTimeout(() => {
+            // Auto Pushpanjali - Flower shower starts automatically
             this.startFlowerShower();
             if (this.celebrationEl) this.celebrationEl.classList.remove('d-none');
-        }, 1600);
+            this.playSynthSound('templeChime');
 
-        // Step 4: Fade Out Overlay Overlay after gates fully open so full interface & flower rain shine through (4800ms)
-        setTimeout(() => {
-            this.jailOverlay.style.opacity = '0';
+            // Step 4b: After 3-second divine poster display, start Krishna Janmashtami video with song (4800ms)
             setTimeout(() => {
-                this.jailOverlay.classList.add('d-none');
-            }, 800);
-        }, 4800);
+                if (this.videoEl) {
+                    this.videoEl.loop = true; // Ensure 24-hour loop is set
+                    this.unmuteAndPlayVideo();
+                }
+            }, 3000); // 3-second poster/bhajan-loading pause
+        }, 1800);
     }
 
-    startFlowerShower() {
-        if (!this.flowerContainer) return;
-
-        // Clear existing flowers
-        this.flowerContainer.innerHTML = '';
-
-        // Initial burst of 35 flowers
-        for (let i = 0; i < 35; i++) {
-            setTimeout(() => this.spawnSingleFlower(), i * 80);
-        }
-
-        // Continuous shower every 250ms
-        if (this.flowerInterval) clearInterval(this.flowerInterval);
-        this.flowerInterval = setInterval(() => {
-            this.spawnSingleFlower();
-        }, 250);
+    /**
+     * Unmute video and trigger play with audio (Song)
+     */
+    unmuteAndPlayVideo() {
+        if (!this.videoEl) return;
+        this.videoEl.muted = false;
+        this.videoEl.play().then(() => {
+            if (this.muteIcon) this.muteIcon.className = 'fas fa-volume-up text-warning';
+            if (this.soundLabel) this.soundLabel.textContent = 'ध्वनि बंद करें';
+        }).catch((err) => {
+            console.warn("Autoplay with sound blocked, trying muted play fallback:", err);
+            this.videoEl.muted = true;
+            this.videoEl.play().catch(() => { });
+        });
     }
 
-    spawnSingleFlower() {
-        if (!this.flowerContainer) return;
+    /**
+     * Native Web Audio API Sound Synthesizer Engine (Zero external audio files required)
+     */
+    playSynthSound(type) {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
 
-        const flowerEl = document.createElement('div');
-        flowerEl.className = 'flower-particle';
+            const ctx = new AudioContext();
 
-        // Pick random flower emoji from active list: 🌸 🌺 🌻 🪷 🌼 🏵️
-        const emoji = this.flowerEmojis[Math.floor(Math.random() * this.flowerEmojis.length)];
-        flowerEl.textContent = emoji;
+            if (type === 'shatter') {
+                // Metallic Impact & Shatter Sound Synth
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.35);
 
-        // Random positions and speeds
-        const startX = Math.random() * 96; // 0% to 96%
-        const fallDuration = (Math.random() * 3.5 + 3.8).toFixed(2); // 3.8s to 7.3s
-        const swayDuration = (Math.random() * 2.2 + 2.0).toFixed(2); // 2s to 4.2s
-        const scale = (Math.random() * 0.7 + 0.7).toFixed(2); // 0.7 to 1.4
+                gain.gain.setValueAtTime(0.6, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
 
-        flowerEl.style.left = `${startX}vw`;
-        flowerEl.style.setProperty('--fall-duration', `${fallDuration}s`);
-        flowerEl.style.setProperty('--sway-duration', `${swayDuration}s`);
-        flowerEl.style.setProperty('--flower-scale', scale);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            } else if (type === 'gateOpen') {
+                // Low Deep Wooden/Iron Creak Resonance Synth
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(80, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(45, ctx.currentTime + 1.2);
 
-        this.flowerContainer.appendChild(flowerEl);
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
 
-        // Remove element after animation completes to keep memory lean
-        setTimeout(() => {
-            if (flowerEl && flowerEl.parentNode) {
-                flowerEl.parentNode.removeChild(flowerEl);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 1.2);
+            } else if (type === 'templeChime') {
+                // Celestial Temple Bell Frequencies (Golden Chime)
+                const frequencies = [523.25, 659.25, 783.99, 1046.50];
+                frequencies.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.8);
+
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 1.8);
+                    }, index * 120);
+                });
             }
-        }, parseFloat(fallDuration) * 1000 + 1000);
+        } catch (e) {
+            // Audio context silently handled if user hasn't interacted with page yet
+        }
     }
 
     setupCanvas() {

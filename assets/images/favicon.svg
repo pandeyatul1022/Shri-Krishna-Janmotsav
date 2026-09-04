@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="1" />
+      <stop offset="60%" stop-color="#eab308" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="1" />
+    </radialGradient>
+    <linearGradient id="featherGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="50%" stop-color="#2dd4bf" />
+      <stop offset="80%" stop-color="#facc15" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+  </defs>
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#bgGlow)" stroke="#facc15" stroke-width="2" />
+  
+  <!-- Peacock Feather Silhouette / Om Icon -->
+  <g transform="translate(18, 15) scale(0.64)">
+    <!-- Eye of Peacock Feather -->
+    <path d="M 50 10 C 25 35 20 60 50 85 C 80 60 75 35 50 10 Z" fill="url(#featherGrad)" />
+    <circle cx="50" cy="45" r="14" fill="#0f172a" stroke="#facc15" stroke-width="3" />
+    <circle cx="50" cy="45" r="8" fill="#38bdf8" />
+    <circle cx="50" cy="45" r="4" fill="#1e1b4b" />
+    <!-- Feather Stem -->
+    <path d="M 50 80 Q 45 110 30 130" stroke="#facc15" stroke-width="4" fill="none" stroke-linecap="round" />
+  </g>
+</svg>
