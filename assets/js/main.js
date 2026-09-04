@@ -305,79 +305,52 @@ class CountdownApp {
             });
         }
 
-        // One-time User Interaction Listener: Unmutes & starts song on first user gesture
-        // After audio is successfully unlocked, these listeners are removed to prevent
-        // repeated play() calls that cause stuttering on mobile browsers.
-        const unlockAudioOnUserGesture = () => {
-            if (!this.videoEl) return;
-            if (this._audioUnlocked) {
-                // Already unlocked, remove all listeners
-                this._removeUnlockListeners();
-                return;
+        // ─── Mobile-Safe Audio Unlock Strategy ───
+        // Step 1: Video starts MUTED (works on all mobile browsers without user gesture)
+        // Step 2: On first user tap/click, we unmute the audio
+        // Step 3: Once unlocked, remove all unlock listeners to prevent re-triggering
+        
+        const unlockAudioOnUserGesture = (e) => {
+            if (!this.videoEl || this._audioUnlocked) return;
+            
+            // Try to unmute - this is within a real user gesture context
+            this.videoEl.muted = false;
+            
+            // If video was paused, also play it
+            if (this.videoEl.paused) {
+                this.videoEl.play().catch(() => {
+                    // If even this fails, re-mute and let video continue muted
+                    this.videoEl.muted = true;
+                });
             }
-            this.unmuteAndPlayVideo();
+            
+            this._audioUnlocked = true;
+            this._updateMuteUI(false); // Update UI to show "unmuted"
+            
+            // Remove ALL unlock listeners - job is done
+            ['click', 'touchstart', 'touchend', 'pointerdown'].forEach(evt => {
+                document.removeEventListener(evt, unlockAudioOnUserGesture, true);
+            });
         };
-
-        // Store reference for cleanup
-        this._unlockHandler = unlockAudioOnUserGesture;
-        this._unlockEventTypes = ['click', 'touchstart', 'pointerdown', 'keydown'];
-
-        this._unlockEventTypes.forEach((eventType) => {
-            document.addEventListener(eventType, this._unlockHandler, { passive: true });
-        });
-
-        // Video container & jail overlay - single click to unmute
-        const videoWrapper = document.querySelector('.krishna-video-wrapper');
-        if (videoWrapper) {
-            videoWrapper.addEventListener('click', () => this.unmuteAndPlayVideo());
-        }
-        if (this.jailOverlay) {
-            this.jailOverlay.addEventListener('click', () => this.unmuteAndPlayVideo());
-        }
-
-        // Auto-resume: If browser pauses video (resource contention, audio focus loss),
-        // automatically resume playback unless user intentionally paused/closed darshan.
-        if (this.videoEl) {
-            this.videoEl.addEventListener('pause', () => {
-                // Only auto-resume if not user-initiated pause
-                if (!this._userPaused && this._audioUnlocked && !this.videoEl.ended) {
-                    setTimeout(() => {
-                        if (this.videoEl && this.videoEl.paused && !this._userPaused && !this.videoEl.ended) {
-                            this.videoEl.play().catch(() => { });
-                        }
-                    }, 300);
-                }
-            });
-
-            // Handle 'waiting' event (buffering) - ensure playback resumes after buffer
-            this.videoEl.addEventListener('waiting', () => {
-                // Browser is buffering, nothing to do - it will auto-resume via 'playing' event
-            });
-
-            // Track successful play state
-            this.videoEl.addEventListener('playing', () => {
-                this._isPlayInProgress = false;
-            });
-        }
-
-        // Handle tab visibility change - resume when user returns to tab
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && this._audioUnlocked && !this._userPaused) {
-                if (this.videoEl && this.videoEl.paused && !this.videoEl.ended) {
-                    this.videoEl.play().catch(() => { });
-                }
-            }
+        
+        // Register unlock listeners on document (capture phase for reliability)
+        ['click', 'touchstart', 'touchend', 'pointerdown'].forEach(evt => {
+            document.addEventListener(evt, unlockAudioOnUserGesture, { capture: true, passive: true });
         });
 
         // Video Audio Mute/Unmute Toggle
         if (this.muteBtn && this.videoEl) {
             this.muteBtn.addEventListener('click', () => {
                 if (this.videoEl.muted) {
-                    this.unmuteAndPlayVideo();
+                    this.videoEl.muted = false;
+                    this._audioUnlocked = true;
+                    this._updateMuteUI(false);
+                    if (this.videoEl.paused) {
+                        this.videoEl.play().catch(() => {});
+                    }
                 } else {
                     this.videoEl.muted = true;
-                    if (this.muteIcon) this.muteIcon.className = 'fas fa-volume-mute';
-                    if (this.soundLabel) this.soundLabel.textContent = 'ध्वनि चालू करें';
+                    this._updateMuteUI(true);
                 }
             });
         }
@@ -517,60 +490,86 @@ class CountdownApp {
             if (this.celebrationEl) this.celebrationEl.classList.remove('d-none');
             this.playSynthSound('templeChime');
 
-            // Step 4b: After 3-second divine poster display, start Krishna Janmashtami video with song (4800ms)
+            // Step 4b: After 3-second divine poster display, start Krishna Janmashtami video with song
             setTimeout(() => {
                 if (this.videoEl) {
-                    this.videoEl.loop = true; // Ensure 24-hour loop is set
-                    this.unmuteAndPlayVideo();
+                    this.videoEl.loop = true;
+                    // Start video MUTED first (works without user gesture on mobile)
+                    // Audio will unmute on first user tap via unlock listener
+                    this._startVideoMuted();
                 }
             }, 3000); // 3-second poster/bhajan-loading pause
         }, 1800);
     }
 
     /**
-     * Remove global unlock event listeners after audio is successfully unlocked.
+     * Start video playback MUTED first (always works on mobile without user gesture).
+     * This is the safe way to start video on mobile browsers.
+     * Audio will be enabled when user taps the screen (via unlock listener in init).
      */
-    _removeUnlockListeners() {
-        if (this._unlockHandler && this._unlockEventTypes) {
-            this._unlockEventTypes.forEach((eventType) => {
-                document.removeEventListener(eventType, this._unlockHandler);
+    _startVideoMuted() {
+        if (!this.videoEl) return;
+        this._userPaused = false;
+        this.videoEl.muted = true;
+        
+        const playMuted = () => {
+            this.videoEl.play().then(() => {
+                this._updateMuteUI(true); // Show muted icon until user taps
+            }).catch(() => {
+                // Even muted play failed - extremely rare, retry once after short delay
+                setTimeout(() => {
+                    if (this.videoEl) this.videoEl.play().catch(() => {});
+                }, 500);
             });
-            this._unlockHandler = null;
+        };
+        
+        // If video is ready, play immediately. Otherwise wait for it to buffer.
+        if (this.videoEl.readyState >= 3) { // HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA
+            playMuted();
+        } else {
+            this.videoEl.addEventListener('canplay', () => playMuted(), { once: true });
         }
     }
 
     /**
      * Unmute video and trigger play with audio (Song).
-     * Guarded against concurrent play() calls that cause mobile stuttering.
+     * Should only be called from a real user gesture context (click/tap handler).
      */
     unmuteAndPlayVideo() {
         if (!this.videoEl) return;
-
-        // Prevent overlapping play() calls - this is the primary cause of mobile stuttering
-        if (this._isPlayInProgress) return;
-        this._isPlayInProgress = true;
-        this._userPaused = false; // Reset user-pause flag since we're explicitly playing
-
+        this._userPaused = false;
+        
         this.videoEl.muted = false;
-        this.videoEl.play().then(() => {
-            this._isPlayInProgress = false;
+        
+        if (this.videoEl.paused) {
+            this.videoEl.play().then(() => {
+                this._audioUnlocked = true;
+                this._updateMuteUI(false);
+            }).catch(() => {
+                // Unmuted play blocked - fall back to muted playback
+                this.videoEl.muted = true;
+                this.videoEl.play().catch(() => {});
+                this._updateMuteUI(true);
+            });
+        } else {
+            // Video already playing, just unmuted it above
             this._audioUnlocked = true;
+            this._updateMuteUI(false);
+        }
+    }
 
-            // Remove global unlock listeners now that audio is playing successfully
-            this._removeUnlockListeners();
-
+    /**
+     * Update mute/unmute button UI state.
+     * @param {boolean} isMuted - true if video is currently muted
+     */
+    _updateMuteUI(isMuted) {
+        if (isMuted) {
+            if (this.muteIcon) this.muteIcon.className = 'fas fa-volume-mute';
+            if (this.soundLabel) this.soundLabel.textContent = 'ध्वनि चालू करें';
+        } else {
             if (this.muteIcon) this.muteIcon.className = 'fas fa-volume-up text-warning';
             if (this.soundLabel) this.soundLabel.textContent = 'ध्वनि बंद करें';
-        }).catch((err) => {
-            console.warn("Autoplay with sound blocked, trying muted play fallback:", err);
-            this.videoEl.muted = true;
-            this.videoEl.play().then(() => {
-                this._isPlayInProgress = false;
-                // Muted play succeeded - keep unlock listeners active for future unmute attempt
-            }).catch(() => {
-                this._isPlayInProgress = false;
-            });
-        });
+        }
     }
 
     /**
