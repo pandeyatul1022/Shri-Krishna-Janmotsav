@@ -201,6 +201,11 @@ class CountdownApp {
         this.hasCelebrated = false;
         this.flowerInterval = null;
 
+        // Audio/Video State Tracking
+        this._isPlayInProgress = false;   // Prevents concurrent play() calls
+        this._audioUnlocked = false;       // Tracks if user gesture unlocked audio
+        this._userPaused = false;          // Tracks if user intentionally paused
+
         // Canvas Setup
         this.canvas = document.getElementById('star-canvas');
         this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
@@ -292,6 +297,7 @@ class CountdownApp {
         if (replayBtn && this.videoEl) {
             replayBtn.addEventListener('click', () => {
                 if (greetingOverlay) greetingOverlay.classList.add('d-none');
+                this._userPaused = false; // Reset so auto-resume works
                 this.videoEl.loop = true;
                 this.videoEl.currentTime = 0;
                 this.unmuteAndPlayVideo();
@@ -299,18 +305,28 @@ class CountdownApp {
             });
         }
 
-        // Persistent User Interaction Listener: Unmutes & starts song on any user click/tap
+        // One-time User Interaction Listener: Unmutes & starts song on first user gesture
+        // After audio is successfully unlocked, these listeners are removed to prevent
+        // repeated play() calls that cause stuttering on mobile browsers.
         const unlockAudioOnUserGesture = () => {
-            if (this.videoEl && (this.videoEl.muted || this.videoEl.paused)) {
-                this.unmuteAndPlayVideo();
+            if (!this.videoEl) return;
+            if (this._audioUnlocked) {
+                // Already unlocked, remove all listeners
+                this._removeUnlockListeners();
+                return;
             }
+            this.unmuteAndPlayVideo();
         };
 
-        ['click', 'touchstart', 'pointerdown', 'keydown'].forEach((eventType) => {
-            document.addEventListener(eventType, unlockAudioOnUserGesture, { passive: true });
+        // Store reference for cleanup
+        this._unlockHandler = unlockAudioOnUserGesture;
+        this._unlockEventTypes = ['click', 'touchstart', 'pointerdown', 'keydown'];
+
+        this._unlockEventTypes.forEach((eventType) => {
+            document.addEventListener(eventType, this._unlockHandler, { passive: true });
         });
 
-        // Also bind directly to video container & jail overlay
+        // Video container & jail overlay - single click to unmute
         const videoWrapper = document.querySelector('.krishna-video-wrapper');
         if (videoWrapper) {
             videoWrapper.addEventListener('click', () => this.unmuteAndPlayVideo());
@@ -318,6 +334,40 @@ class CountdownApp {
         if (this.jailOverlay) {
             this.jailOverlay.addEventListener('click', () => this.unmuteAndPlayVideo());
         }
+
+        // Auto-resume: If browser pauses video (resource contention, audio focus loss),
+        // automatically resume playback unless user intentionally paused/closed darshan.
+        if (this.videoEl) {
+            this.videoEl.addEventListener('pause', () => {
+                // Only auto-resume if not user-initiated pause
+                if (!this._userPaused && this._audioUnlocked && !this.videoEl.ended) {
+                    setTimeout(() => {
+                        if (this.videoEl && this.videoEl.paused && !this._userPaused && !this.videoEl.ended) {
+                            this.videoEl.play().catch(() => { });
+                        }
+                    }, 300);
+                }
+            });
+
+            // Handle 'waiting' event (buffering) - ensure playback resumes after buffer
+            this.videoEl.addEventListener('waiting', () => {
+                // Browser is buffering, nothing to do - it will auto-resume via 'playing' event
+            });
+
+            // Track successful play state
+            this.videoEl.addEventListener('playing', () => {
+                this._isPlayInProgress = false;
+            });
+        }
+
+        // Handle tab visibility change - resume when user returns to tab
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && this._audioUnlocked && !this._userPaused) {
+                if (this.videoEl && this.videoEl.paused && !this.videoEl.ended) {
+                    this.videoEl.play().catch(() => { });
+                }
+            }
+        });
 
         // Video Audio Mute/Unmute Toggle
         if (this.muteBtn && this.videoEl) {
@@ -361,6 +411,7 @@ class CountdownApp {
         const closeDarshanBtn = document.getElementById('close-darshan-btn');
         if (closeDarshanBtn && this.jailOverlay) {
             closeDarshanBtn.addEventListener('click', () => {
+                this._userPaused = true; // Mark as user-intentional pause
                 this.jailOverlay.style.opacity = '0';
                 setTimeout(() => {
                     this.jailOverlay.classList.add('d-none');
@@ -477,18 +528,48 @@ class CountdownApp {
     }
 
     /**
-     * Unmute video and trigger play with audio (Song)
+     * Remove global unlock event listeners after audio is successfully unlocked.
+     */
+    _removeUnlockListeners() {
+        if (this._unlockHandler && this._unlockEventTypes) {
+            this._unlockEventTypes.forEach((eventType) => {
+                document.removeEventListener(eventType, this._unlockHandler);
+            });
+            this._unlockHandler = null;
+        }
+    }
+
+    /**
+     * Unmute video and trigger play with audio (Song).
+     * Guarded against concurrent play() calls that cause mobile stuttering.
      */
     unmuteAndPlayVideo() {
         if (!this.videoEl) return;
+
+        // Prevent overlapping play() calls - this is the primary cause of mobile stuttering
+        if (this._isPlayInProgress) return;
+        this._isPlayInProgress = true;
+        this._userPaused = false; // Reset user-pause flag since we're explicitly playing
+
         this.videoEl.muted = false;
         this.videoEl.play().then(() => {
+            this._isPlayInProgress = false;
+            this._audioUnlocked = true;
+
+            // Remove global unlock listeners now that audio is playing successfully
+            this._removeUnlockListeners();
+
             if (this.muteIcon) this.muteIcon.className = 'fas fa-volume-up text-warning';
             if (this.soundLabel) this.soundLabel.textContent = 'ध्वनि बंद करें';
         }).catch((err) => {
             console.warn("Autoplay with sound blocked, trying muted play fallback:", err);
             this.videoEl.muted = true;
-            this.videoEl.play().catch(() => { });
+            this.videoEl.play().then(() => {
+                this._isPlayInProgress = false;
+                // Muted play succeeded - keep unlock listeners active for future unmute attempt
+            }).catch(() => {
+                this._isPlayInProgress = false;
+            });
         });
     }
 
